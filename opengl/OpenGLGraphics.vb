@@ -1,6 +1,7 @@
 ﻿
 
 Imports System.Drawing
+Imports System.Drawing.Drawing2D
 Imports Microsoft.VisualBasic.Imaging
 Imports Microsoft.VisualBasic.Imaging.Drawing3D
 Imports OpenTK.Graphics
@@ -501,7 +502,7 @@ Public Class OpenGLGraphics : Inherits IGraphics
     End Sub
 
     Public Overrides Sub DrawPolygon(pen As Pen, points() As Point)
-        Throw New NotImplementedException()
+
     End Sub
 
     Public Overrides Sub DrawRectangle(pen As Pen, rect As Rectangle)
@@ -769,39 +770,45 @@ Public Class OpenGLGraphics : Inherits IGraphics
     End Sub
 
     Public Overrides Sub FillPolygon(brush As Brush, points() As PointF)
+        GL.Color3(DirectCast(brush, SolidBrush).Color)
+        GL.Begin(BeginMode.Polygon)
+
+        For Each point As PointF In points
+            GL.Vertex2(point.X, point.Y)
+        Next
+
+        GL.End()
+    End Sub
+
+    Public Overrides Sub FillPolygon(brush As Brush, points() As Point, fillMode As FillMode)
         Throw New NotImplementedException()
     End Sub
 
-    Public Overrides Sub FillPolygon(brush As Brush, points() As Point, fillMode As Drawing.Drawing2D.FillMode)
-        Throw New NotImplementedException()
-    End Sub
-
-    Public Overrides Sub FillPolygon(brush As Brush, points() As PointF, fillMode As Drawing.Drawing2D.FillMode)
+    Public Overrides Sub FillPolygon(brush As Brush, points() As PointF, fillMode As FillMode)
         Throw New NotImplementedException()
     End Sub
 
     Public Overrides Sub FillRectangle(brush As Brush, rect As Rectangle)
-        Throw New NotImplementedException()
+        Call FillRectangle(brush, rect.ToFloat)
     End Sub
 
     Public Overrides Sub FillRectangle(brush As Brush, rect As RectangleF)
-        Throw New NotImplementedException()
+        Dim polygon As PointF() = {
+            New PointF(rect.Left, rect.Top),
+            New PointF(rect.Right, rect.Top),
+            New PointF(rect.Right, rect.Bottom),
+            New PointF(rect.Left, rect.Bottom)
+        }
+
+        Call FillPolygon(brush, polygon)
     End Sub
 
     Public Overrides Sub FillRectangle(brush As Brush, x As Integer, y As Integer, width As Integer, height As Integer)
-        Throw New NotImplementedException()
+        Call FillRectangle(brush, New RectangleF(x, y, width, height))
     End Sub
 
     Public Overrides Sub FillRectangle(brush As Brush, x As Single, y As Single, width As Single, height As Single)
-        Throw New NotImplementedException()
-    End Sub
-
-    Public Overrides Sub FillRectangles(brush As Brush, rects() As RectangleF)
-        Throw New NotImplementedException()
-    End Sub
-
-    Public Overrides Sub FillRectangles(brush As Brush, rects() As Rectangle)
-        Throw New NotImplementedException()
+        Call FillRectangle(brush, New RectangleF(x, y, width, height))
     End Sub
 
     Public Overrides Sub FillRegion(brush As Brush, region As Region)
