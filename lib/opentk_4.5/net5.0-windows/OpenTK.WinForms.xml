@@ -1,0 +1,880 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>OpenTK.WinForms</name>
+    </assembly>
+    <members>
+        <member name="T:OpenTK.WinForms.DummyGLFWGraphicsContext">
+            <summary>
+            At design-time, we don't have a real GLFW graphics context.
+            We use this stub instead, which does nothing but prevent crashes.
+            </summary>
+        </member>
+        <member name="P:OpenTK.WinForms.DummyGLFWGraphicsContext.Instance">
+            <summary>
+            The one-and-only instance of this class.
+            </summary>
+        </member>
+        <member name="P:OpenTK.WinForms.DummyGLFWGraphicsContext.WindowPtr">
+            <summary>
+            The mandatory WindowPtr, which is always a null handle.
+            </summary>
+        </member>
+        <member name="P:OpenTK.WinForms.DummyGLFWGraphicsContext.IsCurrent">
+            <summary>
+            A fake IsCurrent flag, which just stores its last usage.
+            </summary>
+        </member>
+        <member name="M:OpenTK.WinForms.DummyGLFWGraphicsContext.#ctor">
+            <summary>
+            This can only be constructed internally.
+            </summary>
+        </member>
+        <member name="M:OpenTK.WinForms.DummyGLFWGraphicsContext.MakeCurrent">
+            <summary>
+            Make this graphics context "current."  This does mostly nothing.
+            </summary>
+        </member>
+        <member name="M:OpenTK.WinForms.DummyGLFWGraphicsContext.MakeNoneCurrent">
+            <summary>
+            Make *no* graphics context "current."  This does mostly nothing.
+            </summary>
+        </member>
+        <member name="M:OpenTK.WinForms.DummyGLFWGraphicsContext.SwapBuffers">
+            <summary>
+            Swap the displayed buffer.  This does *literally* nothing.
+            </summary>
+        </member>
+        <member name="T:OpenTK.WinForms.GLControl">
+            <summary>
+            OpenGL-capable WinForms control that is a specialized wrapper around
+            OpenTK's NativeWindow.
+            </summary>
+        </member>
+        <member name="F:OpenTK.WinForms.GLControl._glControlSettings">
+            <summary>
+            The OpenGL configuration of this control.
+            </summary>
+        </member>
+        <member name="F:OpenTK.WinForms.GLControl._nativeWindow">
+            <summary>
+            The underlying native window.  This will be reparented to be a child of
+            this control.
+            </summary>
+        </member>
+        <member name="F:OpenTK.WinForms.GLControl._designTimeRenderer">
+            <summary>
+            This is used to render the control at design-time, since we cannot
+            use a real GLFW instance in the WinForms Designer.
+            </summary>
+        </member>
+        <member name="P:OpenTK.WinForms.GLControl.API">
+            <summary>
+            Get or set a value representing the current graphics API.
+            If you change this, the OpenGL context will be recreated, and any
+            data previously allocated with it will be lost.
+            </summary>
+        </member>
+        <member name="P:OpenTK.WinForms.GLControl.Profile">
+            <summary>
+            Gets or sets a value representing the current graphics API profile.
+            If you change this, the OpenGL context will be recreated, and any
+            data previously allocated with it will be lost.
+            </summary>
+        </member>
+        <member name="P:OpenTK.WinForms.GLControl.Flags">
+            <summary>
+            Gets or sets a value representing the current graphics profile flags.
+            If you change this, the OpenGL context will be recreated, and any
+            data previously allocated with it will be lost.
+            </summary>
+        </member>
+        <member name="P:OpenTK.WinForms.GLControl.APIVersion">
+            <summary>
+            Gets or sets a value representing the current version of the graphics API.
+            If you change this, the OpenGL context will be recreated, and any
+            data previously allocated with it will be lost.
+            </summary>
+        </member>
+        <member name="P:OpenTK.WinForms.GLControl.IsEventDriven">
+            <summary>
+            Gets or sets a value indicating whether or not this window is event-driven.
+            An event-driven window will wait for events before updating/rendering. It is useful for non-game applications,
+            where the program only needs to do any processing after the user inputs something.
+            </summary>
+        </member>
+        <member name="P:OpenTK.WinForms.GLControl.IsDesignMode">
+            <summary>
+            The standard DesignMode property is horribly broken; it doesn't work correctly
+            inside the constructor, and it doesn't work correctly under inheritance or when
+            a control is contained by another control.  For compatibility reasons, Microsoft
+            is also unlikely to fix it.  So this properly has *more* correct design-time
+            behavior, everywhere except the constructor.  It tries several techniques to
+            figure out if this is design-time or not, and then it caches the result.
+            </summary>
+        </member>
+        <member name="P:OpenTK.WinForms.GLControl.HasValidContext">
+            <summary>
+            Gets a value indicating whether the underlying native window was
+            successfully created.
+            </summary>
+        </member>
+        <member name="P:OpenTK.WinForms.GLControl.AspectRatio">
+            <summary>
+            Gets the aspect ratio of this GLControl.
+            </summary>
+        </member>
+        <member name="F:OpenTK.WinForms.GLControl._nativeInput">
+             <summary>
+             Access to native-input properties and methods, for more direct control
+             of the keyboard/mouse/joystick than WinForms natively provides.
+             We don't instantiate this unless someone asks for it.  In general, if you
+             *can* do input using WinForms, you *should* do input using WinForms.  But
+             if you need more direct input control, you can use this property instead.
+            
+             This property is null by default.  If you need NativeInput, you
+             *must* use EnableNativeInput to access it.
+             </summary>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControl.#ctor">
+            <summary>
+            Constructs a new instance with default GLControlSettings.  Various things
+            that like to use reflection want to have an empty constructor available,
+            so we offer this constructor rather than just adding `= null` to the
+            constructor that does the actual construction work.
+            </summary>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControl.#ctor(OpenTK.WinForms.GLControlSettings)">
+            <summary>
+            Constructs a new instance with the specified GLControlSettings.
+            </summary>
+            <param name="glControlSettings">The preferred configuration for the OpenGL
+            renderer.  If null, 'GLControlSettings.Default' will be used instead.</param>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControl.OnHandleCreated(System.EventArgs)">
+            <summary>
+            This event handler will be invoked by WinForms when the HWND of this
+            control itself has been created and assigned in the Handle property.
+            We capture the event to construct the NativeWindow that will be responsible
+            for all of the actual OpenGL rendering and native device input.
+            </summary>
+            <param name="e">An EventArgs instance (ignored).</param>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControl.CreateNativeWindow(OpenTK.Windowing.Desktop.NativeWindowSettings)">
+            <summary>
+            Construct the child NativeWindow that will wrap the underlying GLFW instance.
+            </summary>
+            <param name="nativeWindowSettings">The NativeWindowSettings to use for
+            the new GLFW window.</param>
+        </member>
+        <member name="P:OpenTK.WinForms.GLControl.CreateParams">
+            <summary>
+            Gets the CreateParams instance for this GLControl.
+            This is overridden to force correct child behavior.
+            </summary>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControl.RecreateControl">
+            <summary>
+            When major OpenGL-configuration properties are changed, this method is
+            invoked to recreate the underlying NativeWindow accordingly.
+            </summary>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControl.EnsureCreated">
+            <summary>
+            Ensure that the required underlying GLFW window has been created.
+            </summary>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControl.ForceFocusToCorrectWindow">
+            <summary>
+            Because we're really two windows in one, keyboard-focus is a complex
+            topic.  To ensure correct behavior, we have to capture the various attempts
+            to assign focus to one or the other window, and if focus is sent to the
+            wrong window, we have to redirect it to the correct one.  So every attempt
+            to set focus to *either* window will trigger this method, which will force
+            the focus to whichever of the two windows it's supposed to be on.
+            </summary>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControl.NonportableReparent(OpenTK.Windowing.Desktop.NativeWindow)">
+            <summary>
+            Reparent the given NativeWindow to be a child of this GLControl.  This is a
+            non-portable operation, as its name implies:  It works wildly differently
+            between OSes.  The current implementation only supports Microsoft Windows.
+            </summary>
+            <param name="nativeWindow">The NativeWindow that must become a child of
+            this control.</param>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControl.EnableNativeInput(OpenTK.Windowing.Desktop.NativeWindow,System.Boolean)">
+            <summary>
+            Enable/disable NativeInput for the given NativeWindow.
+            </summary>
+            <param name="isEnabled">Whether NativeInput support should be enabled or disabled.</param>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControl.IsNativeInputEnabled(OpenTK.Windowing.Desktop.NativeWindow)">
+            <summary>
+            Determine if native input is enabled for the given NativeWindow.
+            </summary>
+            <param name="nativeWindow">The NativeWindow to query.</param>
+            <returns>True if native input is enabled; false if it is not.</returns>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControl.DetermineIfThisIsInDesignMode">
+            <summary>
+            A fix for the badly-broken DesignMode property, this answers (somewhat more
+            reliably) whether this is DesignMode or not.  This does *not* work when invoked
+            from the GLControl's constructor.
+            </summary>
+            <returns>True if this is in design mode, false if it is not.</returns>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControl.OnHandleDestroyed(System.EventArgs)">
+            <summary>
+            This is triggered when the underlying Handle/HWND instance is *about to be*
+            destroyed (this is called *before* the Handle/HWND is destroyed).  We use it
+            to cleanly destroy the NativeWindow before its parent disappears.
+            </summary>
+            <param name="e">An EventArgs instance (ignored).</param>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControl.DestroyNativeWindow">
+            <summary>
+            Destroy the child NativeWindow that wraps the underlying GLFW instance.
+            </summary>
+        </member>
+        <member name="F:OpenTK.WinForms.GLControl.EVENT_LOAD">
+            <summary>
+            This private object is used as the reference for the 'Load' handler in
+            the Events collection, and is only needed if you use the 'Load' event.
+            </summary>
+        </member>
+        <member name="E:OpenTK.WinForms.GLControl.Load">
+            <summary>
+            An event hook, triggered when the control is created for the first time.
+            </summary>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControl.OnCreateControl">
+            <summary>
+            Raises the CreateControl event.
+            </summary>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControl.OnLoad(System.EventArgs)">
+            <summary>
+            The Load event is fired before the control becomes visible for the first time.
+            </summary>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControl.OnPaint(System.Windows.Forms.PaintEventArgs)">
+            <summary>
+            This is raised by WinForms to paint this instance.
+            </summary>
+            <param name="e">A PaintEventArgs object that describes which areas
+            of the control need to be painted.</param>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControl.OnResize(System.EventArgs)">
+            <summary>
+            This is invoked when the Resize event is triggered, and is used to position
+            the internal GLFW window accordingly.
+            
+            Note: This method may be called before the OpenGL context is ready or the
+            NativeWindow even exists, so everything inside it requires safety checks.
+            </summary>
+            <param name="e">An EventArgs instance (ignored).</param>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControl.ResizeNativeWindow">
+            <summary>
+            Resize the native window to fit this control.
+            </summary>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControl.OnParentChanged(System.EventArgs)">
+            <summary>
+            This event is raised when this control's parent control is changed,
+            which may result in this control becoming a different size or shape, so
+            we capture it to ensure that the underlying GLFW window gets correctly
+            resized and repositioned as well.
+            </summary>
+            <param name="e">An EventArgs instance (ignored).</param>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControl.OnGotFocus(System.EventArgs)">
+            <summary>
+            This event is raised when something sets the focus to the GLControl.
+            It is overridden to potentially force the focus to the NativeWindow, if
+            necessary.
+            </summary>
+            <param name="e">An EventArgs instance (ignored).</param>
+        </member>
+        <member name="F:OpenTK.WinForms.GLControl._noRecursionSafetyArgs">
+            <summary>
+            These EventArgs are used as a safety check to prevent unexpected recursion
+            in OnGotFocus.
+            </summary>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControl.OnNativeWindowFocused(OpenTK.Windowing.Common.FocusedChangedEventArgs)">
+            <summary>
+            This event is raised when something sets the focus to the NativeWindow.
+            It is overridden to potentially force the focus to the GLControl, if
+            necessary.
+            </summary>
+            <param name="e">A FocusChangedEventArgs instance, used to detect if the
+            NativeWindow is gaining the focus.</param>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControl.SwapBuffers">
+            <summary>
+            Swaps the front and back buffers, presenting the rendered scene to the user.
+            </summary>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControl.MakeCurrent">
+            <summary>
+            Makes this control's OpenGL context current in the calling thread.
+            All OpenGL commands issued are hereafter interpreted by this context.
+            When using multiple GLControls, calling MakeCurrent on one control
+            will make all other controls non-current in the calling thread.
+            A GLControl can only be current in one thread at a time.
+            </summary>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControl.EnableNativeInput">
+            <summary>
+            Access to native-input properties and methods, for more direct control
+            of the keyboard/mouse/joystick than WinForms natively provides.
+            We don't enable this unless someone asks for it.  In general, if you
+            *can* do input using WinForms, you *should* do input using WinForms.  But
+            if you need more direct input control, you can use this property instead.
+            
+            Note that enabling native input causes *normal* WinForms input methods to
+            stop working for this GLControl -- all input for will be sent through the
+            NativeInput interface instead.
+            </summary>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControl.DisableNativeInput">
+            <summary>
+            Disable native input support, and return to using WinForms for all
+            keyboard/mouse input.  Any INativeInput interface you may have access
+            to will no longer work propertly until you call EnableNativeInput() again.
+            </summary>
+        </member>
+        <member name="T:OpenTK.WinForms.GLControlDesignTimeRenderer">
+            <summary>
+            At design-time, we really can't load OpenGL and GLFW and render with it
+            for real; the WinForms designer is too limited to support such advanced
+            things without exploding.  So instead, we simply use GDI+ to draw a cube
+            at design-time.  It's not very impressive for OpenGL, but a spinning cube
+            is *really* unusual to see in the WinForms designer, so it will hint to
+            the user that yes, this is a 3D control and you can do 3D things inside
+            it; and it helps to show that it's not simply a black rectangle either,
+            which might suggest to the user that the control is broken.  It's *just*
+            enough, without being too much.
+            </summary>
+        </member>
+        <member name="F:OpenTK.WinForms.GLControlDesignTimeRenderer._owner">
+            <summary>
+            The GLControl that needs to be rendered at design-time.
+            </summary>
+        </member>
+        <member name="F:OpenTK.WinForms.GLControlDesignTimeRenderer._designTimeTimer">
+            <summary>
+            This timer is used to keep the design-time cube rotating so
+            that it's obvious that you're working with a "3D" control.  It
+            fires once every 1/10 of a second, which is abysmally slow for
+            real animation, but which is just fine for design-time rendering.
+            </summary>
+        </member>
+        <member name="F:OpenTK.WinForms.GLControlDesignTimeRenderer._designTimeCubeYaw">
+            <summary>
+            The angle (yaw) of the design-time cube.
+            </summary>
+        </member>
+        <member name="F:OpenTK.WinForms.GLControlDesignTimeRenderer._designTimeCubeRoll">
+            <summary>
+            The angle (pitch) of the design-time cube.
+            </summary>
+        </member>
+        <member name="P:OpenTK.WinForms.GLControlDesignTimeRenderer.CubeLines">
+            <summary>
+            Endpoints that can make a cube.  We only use this in design mode.
+            </summary>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControlDesignTimeRenderer.#ctor(OpenTK.WinForms.GLControl)">
+            <summary>
+            Instantiate a new design-timer renderer for the given GLControl.
+            </summary>
+            <param name="owner">The GLControl that needs to be rendered at
+            design-time.</param>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControlDesignTimeRenderer.Finalize">
+            <summary>
+            Destroy an instance of this object when it is collected by GC.
+            </summary>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControlDesignTimeRenderer.Dispose">
+            <summary>
+            Dispose this object instance and its resources.
+            </summary>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControlDesignTimeRenderer.Dispose(System.Boolean)">
+            <summary>
+            Clean up after this instance's resources.
+            </summary>
+            <param name="isDisposing">True if this was triggered by a real
+            Dispose() call, or false if this was triggered by GC.</param>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControlDesignTimeRenderer.DrawCube(System.Drawing.Graphics,System.Drawing.Color,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single)">
+            <summary>
+            Draw a simple cube, in an ortho projection, using GDI+.
+            </summary>
+            <param name="graphics">The GDI+ Graphics object to draw on.</param>
+            <param name="color">The color for the cube.</param>
+            <param name="cx">The X coordinate of the center point of the cube,
+            in Graphics coordinates.</param>
+            <param name="cy">The Y coordinate of the center point of the cube,
+            in Graphics coordinates.</param>
+            <param name="radius">The radius to the cube's corners from the center point.</param>
+            <param name="yaw">The yaw (rotation around the Y axis) of the cube.</param>
+            <param name="pitch">The pitch (rotation around the X axis) of the cube.</param>
+            <param name="roll">The roll (rotation around the Z axis) of the cube.</param>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControlDesignTimeRenderer.OnDesignTimeTimerTick(System.Object,System.EventArgs)">
+            <summary>
+            This is invoked every 1/10 of a second when rendering in
+            design-time mode, just so that we can keep the fake cube spinning.
+            </summary>
+            <param name="sender">The object that sent this event.</param>
+            <param name="e">The event args (which aren't meaningful).</param>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControlDesignTimeRenderer.Paint(System.Drawing.Graphics)">
+            <summary>
+            In design mode, we have nothing to show, so we paint the
+            background black and put a spinning cube on it so that it's
+            obvious that it's a 3D renderer.
+            </summary>
+        </member>
+        <member name="T:OpenTK.WinForms.GLControlSettings">
+            <summary>
+            Configuration settings for a GLControl.  The properties here are a subset
+            of the NativeWindowSettings properties, restricted to those that make
+            sense in a WinForms environment.
+            </summary>
+        </member>
+        <member name="F:OpenTK.WinForms.GLControlSettings.Default">
+            <summary>
+            Gets the default settings for a <see cref="T:OpenTK.WinForms.GLControl"/>.
+            </summary>
+        </member>
+        <member name="P:OpenTK.WinForms.GLControlSettings.APIVersion">
+            <summary>
+            Gets or sets a value representing the current version of the graphics API.
+            </summary>
+            <remarks>
+            <para>
+            OpenGL 3.3 is selected by default, and runs on almost any hardware made within the last ten years.
+            This will run on Windows, Mac OS, and Linux.
+            </para>
+            <para>
+            OpenGL 4.1 is suggested for modern apps meant to run on more modern hardware.
+            This will run on Windows, Mac OS, and Linux.
+            </para>
+            <para>
+            OpenGL 4.6 is suggested for modern apps that only intend to run on Windows and Linux;
+            Mac OS doesn't support it.
+            </para>
+            <para>
+            Note that if you choose an API other than base OpenGL, this will need to be updated accordingly,
+            as the versioning of OpenGL and OpenGL ES do not match.
+            </para>
+            </remarks>
+        </member>
+        <member name="P:OpenTK.WinForms.GLControlSettings.AutoLoadBindings">
+            <summary>
+            Gets or sets a value indicating whether or not OpenGL bindings should be automatically loaded
+            when the window is created.
+            </summary>
+        </member>
+        <member name="P:OpenTK.WinForms.GLControlSettings.Flags">
+            <summary>
+            Gets or sets a value representing the current graphics profile flags.
+            </summary>
+        </member>
+        <member name="P:OpenTK.WinForms.GLControlSettings.Profile">
+            <summary>
+            Gets or sets a value representing the current graphics API profile.
+            </summary>
+            <remarks>
+            <para>
+            This only has an effect on OpenGL 3.2 and higher. On older versions, this setting does nothing.
+            </para>
+            </remarks>
+        </member>
+        <member name="P:OpenTK.WinForms.GLControlSettings.API">
+            <summary>
+            Gets or sets a value representing the current graphics API.
+            </summary>
+            <remarks>
+            <para>
+            If this is changed, you'll have to modify the API version as well, as the versioning of OpenGL and OpenGL ES
+            do not match.
+            </para>
+            </remarks>
+        </member>
+        <member name="P:OpenTK.WinForms.GLControlSettings.IsEventDriven">
+            <summary>
+            Gets or sets a value indicating whether or not this window is event-driven.
+            An event-driven window will wait for events before updating/rendering. It is useful for non-game applications,
+            where the program only needs to do any processing after the user inputs something.
+            </summary>
+        </member>
+        <member name="P:OpenTK.WinForms.GLControlSettings.SharedContext">
+            <summary>
+            Gets or sets the context to share.
+            </summary>
+        </member>
+        <member name="P:OpenTK.WinForms.GLControlSettings.NumberOfSamples">
+            <summary>
+            Gets or sets a value indicating the number of samples that should be used.
+            </summary>
+            <remarks>
+            <c>0</c> indicates that no multisampling should be used;
+            otherwise multisampling is used if available. The actual number of samples is the closest matching the given number that is supported.
+            </remarks>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControlSettings.Clone">
+            <summary>
+            Make a perfect shallow copy of this object.
+            </summary>
+            <returns>A perfect shallow copy of this GLControlSettings object.</returns>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControlSettings.ToNativeWindowSettings">
+            <summary>
+            Derive a NativeWindowSettings object from this GLControlSettings object.
+            The NativeWindowSettings has all of our properties and more, but many of
+            its properties cannot be reasonably configured by the user when a
+            NativeWindow is being used as a child window.
+            </summary>
+            <returns>The NativeWindowSettings to use when constructing a new
+            NativeWindow.</returns>
+        </member>
+        <member name="M:OpenTK.WinForms.GLControlSettings.FixupVersion(System.Version)">
+            <summary>
+            The WinForms Designer has bugs when it comes to editing Version objects:
+            Many times when a component is left out, it is treated not as 0, but as -1!
+            So this little method corrects for bad data from the WinForms designer.
+            </summary>
+            <param name="version">A version number.</param>
+            <returns>The same version number, but with all negative values clipped to 0.</returns>
+        </member>
+        <member name="T:OpenTK.WinForms.GLFWNative">
+            <summary>
+            This class is taken right from the OpenTK source code.
+            </summary>
+        </member>
+        <member name="T:OpenTK.WinForms.INativeInput">
+            <summary>
+            Abstract access to native-input properties, methods, and events.
+            </summary>
+        </member>
+        <member name="P:OpenTK.WinForms.INativeInput.MousePosition">
+            <summary>
+            Gets or sets the position of the mouse relative to the content area of this window.
+            </summary>
+        </member>
+        <member name="P:OpenTK.WinForms.INativeInput.KeyboardState">
+            <summary>
+            Gets the current state of the keyboard as of the last time the window processed
+            events.
+            </summary>
+        </member>
+        <member name="P:OpenTK.WinForms.INativeInput.JoystickStates">
+            <summary>
+            Gets the current state of the joysticks as of the last time the window processed
+            events.
+            </summary>
+        </member>
+        <member name="P:OpenTK.WinForms.INativeInput.MouseState">
+            <summary>
+            Gets the current state of the mouse as of the last time the window processed
+            events.
+            </summary>
+        </member>
+        <member name="P:OpenTK.WinForms.INativeInput.IsAnyKeyDown">
+            <summary>
+            Gets a value indicating whether any key is down.
+            </summary>
+        </member>
+        <member name="P:OpenTK.WinForms.INativeInput.IsAnyMouseButtonDown">
+            <summary>
+            Gets a value indicating whether any mouse button is pressed.
+            </summary>
+        </member>
+        <member name="E:OpenTK.WinForms.INativeInput.MouseMove">
+            <summary>
+            Occurs whenever the mouse cursor is moved
+            </summary>
+        </member>
+        <member name="E:OpenTK.WinForms.INativeInput.MouseUp">
+            <summary>
+            Occurs whenever a OpenTK.Windowing.GraphicsLibraryFramework.MouseButton is released.
+            </summary>
+        </member>
+        <member name="E:OpenTK.WinForms.INativeInput.MouseDown">
+            <summary>
+            Occurs whenever a OpenTK.Windowing.GraphicsLibraryFramework.MouseButton is clicked.
+            </summary>
+        </member>
+        <member name="E:OpenTK.WinForms.INativeInput.MouseEnter">
+            <summary>
+            Occurs whenever the mouse cursor enters the window OpenTK.Windowing.Desktop.NativeWindow.Bounds.
+            </summary>
+        </member>
+        <member name="E:OpenTK.WinForms.INativeInput.MouseLeave">
+            <summary>
+            Occurs whenever the mouse cursor leaves the window OpenTK.Windowing.Desktop.NativeWindow.Bounds.
+            </summary>
+        </member>
+        <member name="E:OpenTK.WinForms.INativeInput.KeyUp">
+            <summary>
+            Occurs whenever a keyboard key is released.
+            </summary>
+        </member>
+        <member name="E:OpenTK.WinForms.INativeInput.TextInput">
+            <summary>
+            Occurs whenever a Unicode code point is typed.
+            </summary>
+        </member>
+        <member name="E:OpenTK.WinForms.INativeInput.JoystickConnected">
+            <summary>
+            Occurs when a joystick is connected or disconnected.
+            </summary>
+        </member>
+        <member name="E:OpenTK.WinForms.INativeInput.KeyDown">
+            <summary>
+            Occurs whenever a keyboard key is pressed.
+            </summary>
+        </member>
+        <member name="E:OpenTK.WinForms.INativeInput.FileDrop">
+            <summary>
+            Occurs whenever one or more files are dropped on the window.
+            </summary>
+        </member>
+        <member name="E:OpenTK.WinForms.INativeInput.MouseWheel">
+            <summary>
+            Occurs whenever a mouse wheel is moved.
+            </summary>
+        </member>
+        <member name="M:OpenTK.WinForms.INativeInput.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys)">
+            <summary>
+            Gets a <see cref="T:System.Boolean" /> indicating whether this key is currently down.
+            </summary>
+            <param name="key">The <see cref="T:OpenTK.Windowing.GraphicsLibraryFramework.Keys">key</see> to check.</param>
+            <returns><c>true</c> if <paramref name="key"/> is in the down state; otherwise, <c>false</c>.</returns>
+        </member>
+        <member name="M:OpenTK.WinForms.INativeInput.IsKeyPressed(OpenTK.Windowing.GraphicsLibraryFramework.Keys)">
+            <summary>
+            Gets whether the specified key is pressed in the current frame but released in the previous frame.
+            </summary>
+            <remarks>
+            "Frame" refers to invocations of <see cref="!:NativeWindow.ProcessEvents()"/> here.
+            </remarks>
+            <param name="key">The <see cref="T:OpenTK.Windowing.GraphicsLibraryFramework.Keys">key</see> to check.</param>
+            <returns>True if the key is pressed in this frame, but not the last frame.</returns>
+        </member>
+        <member name="M:OpenTK.WinForms.INativeInput.IsKeyReleased(OpenTK.Windowing.GraphicsLibraryFramework.Keys)">
+            <summary>
+            Gets whether the specified key is released in the current frame but pressed in the previous frame.
+            </summary>
+            <remarks>
+            "Frame" refers to invocations of <see cref="!:NativeWindow.ProcessEvents()"/> here.
+            </remarks>
+            <param name="key">The <see cref="T:OpenTK.Windowing.GraphicsLibraryFramework.Keys">key</see> to check.</param>
+            <returns>True if the key is released in this frame, but pressed the last frame.</returns>
+        </member>
+        <member name="M:OpenTK.WinForms.INativeInput.IsMouseButtonDown(OpenTK.Windowing.GraphicsLibraryFramework.MouseButton)">
+            <summary>
+            Gets a <see cref="T:System.Boolean" /> indicating whether this button is currently down.
+            </summary>
+            <param name="button">The <see cref="T:OpenTK.Windowing.GraphicsLibraryFramework.MouseButton" /> to check.</param>
+            <returns><c>true</c> if <paramref name="button"/> is in the down state; otherwise, <c>false</c>.</returns>
+        </member>
+        <member name="M:OpenTK.WinForms.INativeInput.IsMouseButtonPressed(OpenTK.Windowing.GraphicsLibraryFramework.MouseButton)">
+            <summary>
+            Gets whether the specified mouse button is pressed in the current frame but released in the previous frame.
+            </summary>
+            <remarks>
+            "Frame" refers to invocations of <see cref="!:NativeWindow.ProcessEvents()"/> here.
+            </remarks>
+            <param name="button">The button to check.</param>
+            <returns>True if the button is pressed in this frame, but not the last frame.</returns>
+        </member>
+        <member name="M:OpenTK.WinForms.INativeInput.IsMouseButtonReleased(OpenTK.Windowing.GraphicsLibraryFramework.MouseButton)">
+            <summary>
+            Gets whether the specified mouse button is released in the current frame but pressed in the previous frame.
+            </summary>
+            <remarks>
+            "Frame" refers to invocations of <see cref="!:NativeWindow.ProcessEvents()"/> here.
+            </remarks>
+            <param name="button">The button to check.</param>
+            <returns>True if the button is released in this frame, but pressed the last frame.</returns>
+        </member>
+        <member name="T:OpenTK.WinForms.NativeInput">
+             <summary>
+             This proxy class provides access to the native input methods and properties
+             exposed by OpenTK, where those methods and properties are safe to invoke.
+             In general, you should prefer to use WinForms's keyboard/mouse input, but
+             if you need access to "raw" device input within a GLControl, this class
+             provides that access.
+            
+             Instances of this class are only instantiated if they are required; we
+             don't make one of these if we don't need it.
+             </summary>
+        </member>
+        <member name="F:OpenTK.WinForms.NativeInput._nativeWindow">
+            <summary>
+            Access to the underlying NativeWindow.
+            </summary>
+        </member>
+        <member name="P:OpenTK.WinForms.NativeInput.MousePosition">
+            <summary>
+            Gets or sets the position of the mouse relative to the content area of this window.
+            </summary>
+        </member>
+        <member name="P:OpenTK.WinForms.NativeInput.KeyboardState">
+            <summary>
+            Gets the current state of the keyboard as of the last time the window processed
+            events.
+            </summary>
+        </member>
+        <member name="P:OpenTK.WinForms.NativeInput.JoystickStates">
+            <summary>
+            Gets the current state of the joysticks as of the last time the window processed
+            events.
+            </summary>
+        </member>
+        <member name="P:OpenTK.WinForms.NativeInput.MouseState">
+            <summary>
+            Gets the current state of the mouse as of the last time the window processed
+            events.
+            </summary>
+        </member>
+        <member name="P:OpenTK.WinForms.NativeInput.IsAnyKeyDown">
+            <summary>
+            Gets a value indicating whether any key is down.
+            </summary>
+        </member>
+        <member name="P:OpenTK.WinForms.NativeInput.IsAnyMouseButtonDown">
+            <summary>
+            Gets a value indicating whether any mouse button is pressed.
+            </summary>
+        </member>
+        <member name="E:OpenTK.WinForms.NativeInput.MouseMove">
+            <summary>
+            Occurs whenever the mouse cursor is moved
+            </summary>
+        </member>
+        <member name="E:OpenTK.WinForms.NativeInput.MouseUp">
+            <summary>
+            Occurs whenever a OpenTK.Windowing.GraphicsLibraryFramework.MouseButton is released.
+            </summary>
+        </member>
+        <member name="E:OpenTK.WinForms.NativeInput.MouseDown">
+            <summary>
+            Occurs whenever a OpenTK.Windowing.GraphicsLibraryFramework.MouseButton is clicked.
+            </summary>
+        </member>
+        <member name="E:OpenTK.WinForms.NativeInput.MouseEnter">
+            <summary>
+            Occurs whenever the mouse cursor enters the window OpenTK.Windowing.Desktop.NativeWindow.Bounds.
+            </summary>
+        </member>
+        <member name="E:OpenTK.WinForms.NativeInput.MouseLeave">
+            <summary>
+            Occurs whenever the mouse cursor leaves the window OpenTK.Windowing.Desktop.NativeWindow.Bounds.
+            </summary>
+        </member>
+        <member name="E:OpenTK.WinForms.NativeInput.KeyUp">
+            <summary>
+            Occurs whenever a keyboard key is released.
+            </summary>
+        </member>
+        <member name="E:OpenTK.WinForms.NativeInput.TextInput">
+            <summary>
+            Occurs whenever a Unicode code point is typed.
+            </summary>
+        </member>
+        <member name="E:OpenTK.WinForms.NativeInput.JoystickConnected">
+            <summary>
+            Occurs when a joystick is connected or disconnected.
+            </summary>
+        </member>
+        <member name="E:OpenTK.WinForms.NativeInput.KeyDown">
+            <summary>
+            Occurs whenever a keyboard key is pressed.
+            </summary>
+        </member>
+        <member name="E:OpenTK.WinForms.NativeInput.FileDrop">
+            <summary>
+            Occurs whenever one or more files are dropped on the window.
+            </summary>
+        </member>
+        <member name="E:OpenTK.WinForms.NativeInput.MouseWheel">
+            <summary>
+            Occurs whenever a mouse wheel is moved.
+            </summary>
+        </member>
+        <member name="M:OpenTK.WinForms.NativeInput.#ctor(OpenTK.Windowing.Desktop.NativeWindow)">
+            <summary>
+            Construct a new instance of a NativeInput proxy.
+            </summary>
+            <param name="nativeWindow">The NativeWindow that this NativeInput is wrapping.</param>
+        </member>
+        <member name="M:OpenTK.WinForms.NativeInput.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys)">
+            <summary>
+            Gets a <see cref="T:System.Boolean" /> indicating whether this key is currently down.
+            </summary>
+            <param name="key">The <see cref="T:OpenTK.Windowing.GraphicsLibraryFramework.Keys">key</see> to check.</param>
+            <returns><c>true</c> if <paramref name="key"/> is in the down state; otherwise, <c>false</c>.</returns>
+        </member>
+        <member name="M:OpenTK.WinForms.NativeInput.IsKeyPressed(OpenTK.Windowing.GraphicsLibraryFramework.Keys)">
+            <summary>
+            Gets whether the specified key is pressed in the current frame but released in the previous frame.
+            </summary>
+            <remarks>
+            "Frame" refers to invocations of <see cref="M:OpenTK.Windowing.Desktop.NativeWindow.ProcessEvents"/> here.
+            </remarks>
+            <param name="key">The <see cref="T:OpenTK.Windowing.GraphicsLibraryFramework.Keys">key</see> to check.</param>
+            <returns>True if the key is pressed in this frame, but not the last frame.</returns>
+        </member>
+        <member name="M:OpenTK.WinForms.NativeInput.IsKeyReleased(OpenTK.Windowing.GraphicsLibraryFramework.Keys)">
+            <summary>
+            Gets whether the specified key is released in the current frame but pressed in the previous frame.
+            </summary>
+            <remarks>
+            "Frame" refers to invocations of <see cref="M:OpenTK.Windowing.Desktop.NativeWindow.ProcessEvents"/> here.
+            </remarks>
+            <param name="key">The <see cref="T:OpenTK.Windowing.GraphicsLibraryFramework.Keys">key</see> to check.</param>
+            <returns>True if the key is released in this frame, but pressed the last frame.</returns>
+        </member>
+        <member name="M:OpenTK.WinForms.NativeInput.IsMouseButtonDown(OpenTK.Windowing.GraphicsLibraryFramework.MouseButton)">
+            <summary>
+            Gets a <see cref="T:System.Boolean" /> indicating whether this button is currently down.
+            </summary>
+            <param name="button">The <see cref="T:OpenTK.Windowing.GraphicsLibraryFramework.MouseButton" /> to check.</param>
+            <returns><c>true</c> if <paramref name="button"/> is in the down state; otherwise, <c>false</c>.</returns>
+        </member>
+        <member name="M:OpenTK.WinForms.NativeInput.IsMouseButtonPressed(OpenTK.Windowing.GraphicsLibraryFramework.MouseButton)">
+            <summary>
+            Gets whether the specified mouse button is pressed in the current frame but released in the previous frame.
+            </summary>
+            <remarks>
+            "Frame" refers to invocations of <see cref="M:OpenTK.Windowing.Desktop.NativeWindow.ProcessEvents"/> here.
+            </remarks>
+            <param name="button">The button to check.</param>
+            <returns>True if the button is pressed in this frame, but not the last frame.</returns>
+        </member>
+        <member name="M:OpenTK.WinForms.NativeInput.IsMouseButtonReleased(OpenTK.Windowing.GraphicsLibraryFramework.MouseButton)">
+            <summary>
+            Gets whether the specified mouse button is released in the current frame but pressed in the previous frame.
+            </summary>
+            <remarks>
+            "Frame" refers to invocations of <see cref="M:OpenTK.Windowing.Desktop.NativeWindow.ProcessEvents"/> here.
+            </remarks>
+            <param name="button">The button to check.</param>
+            <returns>True if the button is released in this frame, but pressed the last frame.</returns>
+        </member>
+        <member name="T:OpenTK.WinForms.Win32">
+            <summary>
+            P/Invoke functions and declarations for Microsoft Windows (32-bit and 64-bit).
+            </summary>
+        </member>
+    </members>
+</doc>
