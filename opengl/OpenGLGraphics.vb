@@ -4,8 +4,6 @@ Imports System.Drawing
 Imports System.Drawing.Drawing2D
 Imports Microsoft.VisualBasic.Imaging
 Imports Microsoft.VisualBasic.Imaging.Drawing3D
-Imports OpenTK.Graphics
-Imports GL = OpenTK.Graphics.OpenGL.GL
 
 Public Class OpenGLGraphics : Inherits IGraphics
 
