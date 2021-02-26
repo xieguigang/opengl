@@ -6,7 +6,7 @@ Imports System.Runtime.CompilerServices
 Imports Microsoft.VisualBasic.Imaging
 Imports Microsoft.VisualBasic.Imaging.Drawing3D
 
-Public Class OpenGLGraphics : Inherits IGraphics
+Public Class GLGraphics : Inherits IGraphics
 
     Public Overrides ReadOnly Property Size As Size
         Get
@@ -667,6 +667,30 @@ Public Class OpenGLGraphics : Inherits IGraphics
 
     Public Overrides Sub ExcludeClip(region As Region)
         Throw New NotImplementedException()
+    End Sub
+
+    Public Sub FillTriangle(color As Color, a As PointF, b As PointF, c As PointF)
+        ' Old school OpenGL
+        Gl.Begin(PrimitiveType.Triangles)
+
+        Call GlColor3(color)
+
+        Gl.Vertex2(a.X, a.Y)
+        Gl.Vertex2(b.X, b.Y)
+        Gl.Vertex2(c.X, c.Y)
+        Gl.End()
+    End Sub
+
+    Public Sub FillTriangle(color As Color, a As Point3D, b As Point3D, c As Point3D)
+        ' Old school OpenGL
+        Gl.Begin(PrimitiveType.Triangles)
+
+        Call GlColor3(color)
+
+        Gl.Vertex3(a.X, a.Y, a.Z)
+        Gl.Vertex3(b.X, b.Y, b.Z)
+        Gl.Vertex3(c.X, c.Y, c.Z)
+        Gl.End()
     End Sub
 
     Public Overrides Sub FillClosedCurve(brush As Brush, points() As PointF)
