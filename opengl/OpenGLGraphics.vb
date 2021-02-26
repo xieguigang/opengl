@@ -2,6 +2,7 @@
 
 Imports System.Drawing
 Imports System.Drawing.Drawing2D
+Imports System.Runtime.CompilerServices
 Imports Microsoft.VisualBasic.Imaging
 Imports Microsoft.VisualBasic.Imaging.Drawing3D
 
@@ -11,39 +12,6 @@ Public Class OpenGLGraphics : Inherits IGraphics
         Get
             Throw New NotImplementedException()
         End Get
-    End Property
-
-    Public Overrides Property Clip As Region
-        Get
-            Throw New NotImplementedException()
-        End Get
-        Set(value As Region)
-            Throw New NotImplementedException()
-        End Set
-    End Property
-
-    Public Overrides ReadOnly Property ClipBounds As RectangleF
-        Get
-            Throw New NotImplementedException()
-        End Get
-    End Property
-
-    Public Overrides Property CompositingMode As Drawing.Drawing2D.CompositingMode
-        Get
-            Throw New NotImplementedException()
-        End Get
-        Set(value As Drawing.Drawing2D.CompositingMode)
-            Throw New NotImplementedException()
-        End Set
-    End Property
-
-    Public Overrides Property CompositingQuality As Drawing.Drawing2D.CompositingQuality
-        Get
-            Throw New NotImplementedException()
-        End Get
-        Set(value As Drawing.Drawing2D.CompositingQuality)
-            Throw New NotImplementedException()
-        End Set
     End Property
 
     Public Overrides ReadOnly Property DpiX As Single
@@ -142,28 +110,20 @@ Public Class OpenGLGraphics : Inherits IGraphics
         End Set
     End Property
 
-    Public Overrides Property Transform As Drawing.Drawing2D.Matrix
-        Get
-            Throw New NotImplementedException()
-        End Get
-        Set(value As Drawing.Drawing2D.Matrix)
-            Throw New NotImplementedException()
-        End Set
-    End Property
-
-    Public Overrides ReadOnly Property VisibleClipBounds As RectangleF
-        Get
-            Throw New NotImplementedException()
-        End Get
-    End Property
+    <MethodImpl(MethodImplOptions.AggressiveInlining)>
+    Private Sub GlColor3(c As Color)
+        Call Gl.Color3(CSng(c.R / 255), CSng(c.G / 255), CSng(c.B / 255))
+    End Sub
 
     Public Overloads Sub DrawLine(pen As Pen, a As Point3D, b As Point3D)
-        GL.Color3(pen.Color)
-        GL.LineWidth(pen.Width)
-        GL.Begin(BeginMode.Lines)
-        GL.Vertex3(a.X, a.Y, a.Z)
-        GL.Vertex3(b.X, b.Y, b.Z)
-        GL.End()
+        Gl.Begin(PrimitiveType.Lines)
+
+        Call GlColor3(pen.Color)
+
+        Gl.LineWidth(pen.Width)
+        Gl.Vertex3(a.X, a.Y, a.Z)
+        Gl.Vertex3(b.X, b.Y, b.Z)
+        Gl.End()
     End Sub
 
     Public Overrides Sub DrawLine(pen As Pen, pt1 As PointF, pt2 As PointF)
@@ -179,12 +139,14 @@ Public Class OpenGLGraphics : Inherits IGraphics
     End Sub
 
     Public Overrides Sub DrawLine(pen As Pen, x1 As Single, y1 As Single, x2 As Single, y2 As Single)
-        GL.Color3(pen.Color)
-        GL.LineWidth(pen.Width)
-        GL.Begin(BeginMode.Lines)
-        GL.Vertex2(x1, y1)
-        GL.Vertex2(x2, y2)
-        GL.End()
+        Gl.Begin(PrimitiveType.Lines)
+
+        Call GlColor3(pen.Color)
+
+        Gl.LineWidth(pen.Width)
+        Gl.Vertex2(x1, y1)
+        Gl.Vertex2(x2, y2)
+        Gl.End()
     End Sub
 
     Public Overrides Sub AddMetafileComment(data() As Byte)
@@ -768,14 +730,14 @@ Public Class OpenGLGraphics : Inherits IGraphics
     End Sub
 
     Public Overrides Sub FillPolygon(brush As Brush, points() As PointF)
-        GL.Color3(DirectCast(brush, SolidBrush).Color)
-        GL.Begin(BeginMode.Polygon)
+        Call Gl.Begin(PrimitiveType.Polygon)
+        Call GlColor3(DirectCast(brush, SolidBrush).Color)
 
         For Each point As PointF In points
-            GL.Vertex2(point.X, point.Y)
+            Gl.Vertex2(point.X, point.Y)
         Next
 
-        GL.End()
+        Gl.End()
     End Sub
 
     Public Overrides Sub FillPolygon(brush As Brush, points() As Point, fillMode As FillMode)
@@ -841,23 +803,11 @@ Public Class OpenGLGraphics : Inherits IGraphics
         Throw New NotImplementedException()
     End Sub
 
-    Public Overrides Sub ReleaseHdc(hdc As IntPtr)
-        Throw New NotImplementedException()
-    End Sub
-
-    Public Overrides Sub ReleaseHdcInternal(hdc As IntPtr)
-        Throw New NotImplementedException()
-    End Sub
-
     Public Overrides Sub ResetClip()
         Throw New NotImplementedException()
     End Sub
 
     Public Overrides Sub ResetTransform()
-        Throw New NotImplementedException()
-    End Sub
-
-    Public Overrides Sub Restore(gstate As Drawing.Drawing2D.GraphicsState)
         Throw New NotImplementedException()
     End Sub
 
