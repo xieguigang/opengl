@@ -120,6 +120,15 @@ Public Class GLGraphics : Inherits IGraphics
         Call Gl.Color3(CSng(c.R / 255), CSng(c.G / 255), CSng(c.B / 255))
     End Sub
 
+    Public Shared Sub DrawObject(type As PrimitiveType, color As Color, render As Action)
+        Gl.Begin(type)
+
+        Call GlColor4(color)
+        Call render()
+
+        Gl.End()
+    End Sub
+
     Public Overloads Sub DrawLine(pen As Pen, a As Point3D, b As Point3D)
         Gl.Begin(PrimitiveType.Lines)
 
