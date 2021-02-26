@@ -111,7 +111,12 @@ Public Class GLGraphics : Inherits IGraphics
     End Property
 
     <MethodImpl(MethodImplOptions.AggressiveInlining)>
-    Private Sub GlColor3(c As Color)
+    Public Shared Sub GlColor4(c As Color)
+        Call Gl.Color4(CSng(c.R / 255), CSng(c.G / 255), CSng(c.B / 255), CSng(c.A / 255))
+    End Sub
+
+    <MethodImpl(MethodImplOptions.AggressiveInlining)>
+    Public Shared Sub GlColor3(c As Color)
         Call Gl.Color3(CSng(c.R / 255), CSng(c.G / 255), CSng(c.B / 255))
     End Sub
 
