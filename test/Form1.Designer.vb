@@ -1,4 +1,4 @@
-﻿Namespace OpenTK.WinForms.TestForm
+Namespace OpenTK.WinForms.TestForm
     Partial Class Form1
         ''' <summary>
         '''  Required designer variable.

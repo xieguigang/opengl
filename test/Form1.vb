@@ -1,4 +1,4 @@
-﻿Imports System
+Imports System
 Imports System.Windows.Forms
 Imports OpenTK.Graphics.OpenGL
 Imports OpenTK.Mathematics
